@@ -20,6 +20,15 @@ class nexus(
     path => '/opt/staging',
   }
 
+  if !defined(User[$run_as_user]) {
+    user { $run_as_user :
+      ensure  => present,
+      home    => $nexus_home,
+    }
+
+    User[$run_as_user] -> [ File[$nexus_home, "${base_dir}/sonatype-work"], Service['nexus'] ]
+  }
+
   staging::file { $tar_name:
     source => $remote_url,
   } ->
@@ -27,8 +36,16 @@ class nexus(
   exec { "extract ${tar_name}":
     command   => "/bin/tar --transform='s/nexus-[0-9]*.[0-9]*.[0-9]*-[0-9]*/nexus/' -xzf /opt/staging/nexus/${tar_name}",
     cwd       => $base_dir,
-    creates   => "${base_dir}/nexus",
+    creates   => $nexus_home,
     logoutput => on_failure,
+  } ->
+
+  file { [$nexus_home, "${base_dir}/sonatype-work"]:
+    ensure  => directory,
+    recurse => true,
+    owner   => $run_as_user,
+    group   => $run_as_user,
+    mode    => '0775',
   } ->
 
   file { '/etc/init.d/nexus':
@@ -41,14 +58,6 @@ class nexus(
 
   service { 'nexus':
     ensure => 'running',
-  }
-
-  if !defined(User[$run_as_user]) {
-    user { $run_as_user :
-      ensure  => present,
-      home    => $nexus_home,
-      require => Service['nexus'],
-    }
   }
 
 }
