@@ -4,9 +4,10 @@ describe 'nexus', :type => :class do
 
   let :params do
     {
-      :base_dir   => '/usr/local',
-      :remote_url => 'http://www.sonatype.org/downloads/nexus-latest-bundle.tar.gz',
-      :tar_name   => 'nexus-latest.tar.gz'
+      :base_dir    => '/usr/local',
+      :run_as_user => 'nexus',
+      :remote_url  => 'http://www.sonatype.org/downloads/nexus-latest-bundle.tar.gz',
+      :tar_name    => 'nexus-latest.tar.gz'
     }
   end
 
@@ -26,7 +27,18 @@ describe 'nexus', :type => :class do
         :creates => '/usr/local/nexus'
       })
     end
-    it 'should start it somehow'
+
+    it 'should start it somehow' do
+      should contain_file('/etc/init.d/nexus')
+        .with_content(/^NEXUS_HOME=\"\/usr\/local\/nexus\"$/)
+        .with_content(/^RUN_AS_USER=\"nexus\"/)
+
+      should contain_service('nexus').with_ensure('running')
+    end
+
+    it 'should create a nexus user' do
+      should contain_user('nexus')
+    end
 
   end
 
