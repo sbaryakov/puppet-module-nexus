@@ -1,0 +1,8 @@
+name 'justinclayton-nexus'
+version '0.0.1'
+source 'git://github.com/justinclayton/puppet-module-nexus.git'
+author 'justinclayton'
+license 'MIT'
+summary 'Puppet module for nexus'
+description 'Puppet module for nexus'
+project_page 'http://github.com/justinclayton/puppet-module-nexus'

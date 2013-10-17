@@ -1,0 +1,5 @@
+fixtures:
+  repositories:
+    staging: "https://github.com/nanliu/puppet-staging.git"
+  symlinks:
+    nexus: "#{source_dir}"
