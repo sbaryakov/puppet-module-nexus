@@ -12,7 +12,7 @@ class nexus(
   }
 
   class { 'staging':
-    path => $base_dir,
+    path => '/opt/staging',
   }
 
   staging::file { $tar_name:
@@ -20,10 +20,11 @@ class nexus(
   }
 
   exec { "extract ${tar_name}":
-    command   => "/bin/tar --transform='s/nexus-[0-9]*\.[0-9]*\.[0-9]*-[0-9]*/nexus/' -xzf ${tar_name}",
+    command   => "/bin/tar --transform='s/nexus-[0-9]*.[0-9]*.[0-9]*-[0-9]*/nexus/' -xzf /opt/staging/nexus/${tar_name}",
     cwd       => $base_dir,
     creates   => "${base_dir}/nexus",
     logoutput => on_failure,
+    require   => Staging::File[$tar_name],
   }
 
 }
