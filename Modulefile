@@ -6,3 +6,6 @@ license 'MIT'
 summary 'Puppet module for nexus'
 description 'Puppet module for nexus'
 project_page 'http://github.com/justinclayton/puppet-module-nexus'
+
+dependency 'puppetlabs/java', '>= 1.0.1'
+dependency 'nanliu/staging',  '>= 0.3.1'

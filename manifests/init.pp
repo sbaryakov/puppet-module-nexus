@@ -8,6 +8,8 @@ class nexus(
   $tar_name    = 'nexus-latest.tar.gz'
 ) {
 
+  include java
+
   $nexus_home = "${base_dir}/nexus"
 
   if $::osfamily != 'RedHat' {
