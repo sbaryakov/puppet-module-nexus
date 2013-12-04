@@ -26,7 +26,7 @@ class nexus(
       home    => $nexus_home,
     }
 
-    User[$run_as_user] -> [ File[$nexus_home, "${base_dir}/sonatype-work"], Service['nexus'] ]
+    User[$run_as_user] -> File[$nexus_home, "${base_dir}/sonatype-work"] -> Service['nexus']
   }
 
   staging::file { $tar_name:
