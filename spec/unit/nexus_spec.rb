@@ -15,7 +15,8 @@ describe 'nexus', :type => :class do
 
     let :facts do
       {
-        :osfamily => 'redhat'
+        :osfamily           => 'redhat',
+        :operatingsystem    => 'redhat'
       }
     end
 
@@ -50,7 +51,7 @@ describe 'nexus', :type => :class do
     end
 
     it 'should fail with an error' do
-      expect { subject }.to raise_error(Puppet::Error,/unsupported osfamily \"fuuuu\"/)
+      expect { subject }.to raise_error(Puppet::Error,/unsupported/)
     end
   end
 
