@@ -43,12 +43,20 @@ class nexus(
     logoutput => on_failure,
   } ->
 
-  file { [$nexus_home, "${base_dir}/sonatype-work"]:
+  file { $nexus_home:
     ensure  => directory,
     recurse => true,
     owner   => $run_as_user,
     group   => $run_as_user,
     mode    => '0775',
+  } ->
+
+  file { "${base_dir}/sonatype-work":
+    ensure  => directory,
+    recurse => true,
+    owner   => $run_as_user,
+    group   => $run_as_user,
+    mode    => '0644',
   } ->
 
   file { '/etc/init.d/nexus':
