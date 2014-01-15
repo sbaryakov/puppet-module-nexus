@@ -2,13 +2,16 @@
 #
 #
 class nexus(
-  $base_dir    = '/usr/local',
-  $run_as_user = 'nexus',
-  $remote_url  = 'http://www.sonatype.org/downloads/nexus-latest-bundle.tar.gz',
-  $tar_name    = 'nexus-latest.tar.gz'
+  $base_dir     = '/usr/local',
+  $run_as_user  = 'nexus',
+  $remote_url   = 'http://www.sonatype.org/downloads/nexus-latest-bundle.tar.gz',
+  $tar_name     = 'nexus-latest.tar.gz',
+  $install_java = true
 ) {
 
-  include java
+  if $install_java == true {
+    include java
+  }
 
   $nexus_home = "${base_dir}/nexus"
 
