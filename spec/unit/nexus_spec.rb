@@ -4,10 +4,11 @@ describe 'nexus', :type => :class do
 
   let :params do
     {
-      :base_dir    => '/usr/local',
-      :run_as_user => 'nexus',
-      :remote_url  => 'http://www.sonatype.org/downloads/nexus-latest-bundle.tar.gz',
-      :tar_name    => 'nexus-latest.tar.gz'
+      :base_dir     => '/usr/local',
+      :run_as_user  => 'nexus',
+      :remote_url   => 'http://www.sonatype.org/downloads/nexus-latest-bundle.tar.gz',
+      :tar_name     => 'nexus-latest.tar.gz',
+      :install_java => true,
     }
   end
 
@@ -18,6 +19,10 @@ describe 'nexus', :type => :class do
         :osfamily           => 'redhat',
         :operatingsystem    => 'redhat'
       }
+    end
+
+    it 'should include java' do
+      should contain_class('java')
     end
 
     it 'should download and unpack the latest nexus version' do
@@ -41,6 +46,13 @@ describe 'nexus', :type => :class do
       should contain_user('nexus')
     end
 
+    context 'when install_java param is false' do
+      let(:params) {{ :install_java => false }}
+
+      it 'should not include java' do
+        should_not contain_class('java')
+      end
+    end
   end
 
   context 'on unsupported osfamilies' do
@@ -54,6 +66,4 @@ describe 'nexus', :type => :class do
       expect { subject }.to raise_error(Puppet::Error,/unsupported/)
     end
   end
-
-
 end

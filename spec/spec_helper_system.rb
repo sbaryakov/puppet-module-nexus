@@ -20,5 +20,6 @@ RSpec.configure do |c|
 
     puppet_module_install(:source => proj_root, :module_name => 'nexus')
     shell('puppet module install nanliu-staging')
+    shell('puppet module install puppetlabs-java')
   end
 end
