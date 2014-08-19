@@ -393,6 +393,21 @@ console() {
     fi
 }
 
+waitForPort() {
+    #wait for the port to listen
+    wait_count=30
+    while netstat -lnt | awk '$4 ~ /:8081$/ {exit 1}'
+        do
+            echo "Waiting for port 8081"
+            sleep 10
+            wait_count=$((wait_count-1))
+            if [ $wait_count -eq 0 ]; then
+            echo "Timed out waiting for port 8081"
+            exit 1
+        fi
+    done
+}
+
 start() {
     echo "Starting $APP_LONG_NAME..."
     getpid
@@ -408,6 +423,7 @@ start() {
     getpid
     if [ "X$pid" != "X" ]
     then
+        waitForPort
         echo "Started $APP_LONG_NAME."
     else
         echo "Failed to start $APP_LONG_NAME."
