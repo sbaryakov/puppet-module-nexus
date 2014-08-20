@@ -69,6 +69,7 @@ class nexus(
 
   service { 'nexus':
     ensure => 'running',
+    enable => true
   }
 
 }
