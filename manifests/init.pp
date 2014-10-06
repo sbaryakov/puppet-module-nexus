@@ -2,11 +2,13 @@
 #
 #
 class nexus(
-  $base_dir     = '/usr/local',
-  $run_as_user  = 'nexus',
-  $remote_url   = 'http://www.sonatype.org/downloads/nexus-latest-bundle.tar.gz',
-  $tar_name     = 'nexus-latest.tar.gz',
-  $install_java = true
+  $base_dir        = '/usr/local',
+  $run_as_user     = 'nexus',
+  $remote_url      = 'http://download.sonatype.com/nexus/oss/nexus-latest-bundle.tar.gz',
+  $tar_name        = 'nexus-latest.tar.gz',
+  $java_initmemory = 128,
+  $java_maxmemory  = 256,
+  $install_java    = true
 ) {
 
   if $install_java == true {
@@ -65,6 +67,22 @@ class nexus(
     group   => 'root',
     mode    => '0755',
     content => template('nexus/nexus.init.erb'),
+  } ->
+
+  ini_setting {
+    'java_initmemory':
+      ensure  => present,
+      path    => "${base_dir}/nexus/bin/jsw/conf/wrapper.conf",
+      section => '',
+      setting => 'wrapper.java.initmemory',
+      value   => $java_initmemory;
+
+    'java_maxmemory':
+      ensure  => present,
+      path    => "${base_dir}/nexus/bin/jsw/conf/wrapper.conf",
+      section => '',
+      setting => 'wrapper.java.maxmemory',
+      value   => $java_maxmemory;
   } ->
 
   service { 'nexus':
