@@ -3,5 +3,6 @@ fixtures:
     staging: "https://github.com/nanliu/puppet-staging.git"
     java:    "https://github.com/puppetlabs/puppetlabs-java.git"
     stdlib:  "https://github.com/puppetlabs/puppetlabs-stdlib.git"
+    inifile: "https://github.com/puppetlabs/puppetlabs-inifile.git"
   symlinks:
     nexus: "#{source_dir}"
