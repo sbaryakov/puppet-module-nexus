@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<security>
+  <version>2.0.5</version>
+  <users>
+    <user>
+      <id>admin</id>
+      <firstName>Administrator</firstName>
+      <lastName>User</lastName>
+      <password><%= @admin_password %></password>
+      <status>active</status>
+      <email>changeme@yourcompany.com</email>
+    </user>
+    <user>
+      <id>anonymous</id>
+      <firstName>Nexus</firstName>
+      <lastName>Anonymous User</lastName>
+      <password>$shiro1$SHA-512$1024$jbLYMX6V3aCrhK66DBvXjg==$wEik5iOlppEP93Njmjl9e636Uz+Y6ToOD+lZoTb7nYHB8rHFg71NBwKtWJpvWqLlUklJ8B8DIlHsbO35sVzg2g==</password>
+      <status><%= @anonymous_status %></status>
+      <email>changeme2@yourcompany.com</email>
+    </user>
+  </users>
+  <userRoleMappings>
+    <userRoleMapping>
+      <userId>admin</userId>
+      <source>default</source>
+      <roles>
+        <role>nx-admin</role>
+      </roles>
+    </userRoleMapping>
+    <userRoleMapping>
+      <userId>anonymous</userId>
+      <source>default</source>
+      <roles>
+        <role>anonymous</role>
+        <role>repository-any-read</role>
+      </roles>
+    </userRoleMapping>
+  </userRoleMappings>
+</security>
