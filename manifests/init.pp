@@ -2,13 +2,15 @@
 #
 #
 class nexus(
-  $base_dir        = '/usr/local',
-  $run_as_user     = 'nexus',
-  $remote_url      = 'http://download.sonatype.com/nexus/oss/nexus-latest-bundle.tar.gz',
-  $tar_name        = 'nexus-latest.tar.gz',
-  $java_initmemory = 128,
-  $java_maxmemory  = 256,
-  $install_java    = true
+  $base_dir            = '/usr/local',
+  $run_as_user         = 'nexus',
+  $remote_url          = 'http://download.sonatype.com/nexus/oss/nexus-latest-bundle.tar.gz',
+  $tar_name            = 'nexus-latest.tar.gz',
+  $java_initmemory     = 128,
+  $java_maxmemory      = 256,
+  $install_java        = true,
+  $admin_password_sha1 = undef,
+  $anonymous_status    = undef
 ) {
 
   if $install_java == true {
@@ -90,4 +92,9 @@ class nexus(
     enable => true
   }
 
+  file { "${base_dir}/sonatype-work/nexus/conf/security.xml":
+    content => template('nexus/security.xml.erb'),
+    mode    => '644',
+    require => Exec [ "extract ${tar_name}"],
+  }
 }
