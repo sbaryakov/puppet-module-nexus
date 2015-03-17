@@ -4,5 +4,6 @@ fixtures:
     java:    "https://github.com/puppetlabs/puppetlabs-java.git"
     stdlib:  "https://github.com/puppetlabs/puppetlabs-stdlib.git"
     inifile: "https://github.com/puppetlabs/puppetlabs-inifile.git"
+    lvm:     "https://github.com/puppetlabs/puppetlabs-lvm.git"
   symlinks:
     nexus: "#{source_dir}"

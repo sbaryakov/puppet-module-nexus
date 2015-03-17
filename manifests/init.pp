@@ -2,19 +2,39 @@
 #
 #
 class nexus(
-  $base_dir            = '/usr/local',
-  $run_as_user         = 'nexus',
-  $remote_url          = 'http://download.sonatype.com/nexus/oss/nexus-latest-bundle.tar.gz',
-  $tar_name            = 'nexus-latest.tar.gz',
-  $java_initmemory     = 128,
-  $java_maxmemory      = 256,
-  $install_java        = true,
-  $admin_password_sha1 = undef,
-  $anonymous_status    = undef
+  $base_dir             = '/usr/local',
+  $run_as_user          = 'nexus',
+  $remote_url           = 'http://download.sonatype.com/nexus/oss/nexus-latest-bundle.tar.gz',
+  $tar_name             = 'nexus-latest.tar.gz',
+  $java_initmemory      = 128,
+  $java_maxmemory       = 256,
+  $install_java         = true,
+  $admin_password_crypt = '$shiro1$SHA-512$1024$G+rxqm4Qw5/J54twR6BrSQ==$2ZUS4aBHbGGZkNzLugcQqhea7uPOXhoY4kugop4r4oSAYlJTyJ9RyZYLuFBmNzDr16Ii1Q+O6Mn1QpyBA1QphA==',
+  $enable_anonymous     = false,
+  $blk_device           = undef,
+  $mount_storage        = false
 ) {
+
+  validate_bool($enable_anonymous)
+  validate_bool($install_java)
+  validate_bool($mount_storage)
 
   if $install_java == true {
     include java
+  }
+
+  if $mount_storage {
+
+    File["${base_dir}/sonatype-work"] -> Class['nexus::storage'] -> Service['nexus']
+    class { 'nexus::storage': }
+
+  }
+
+
+  if $enable_anonymous {
+    $anonymous_status = 'active'
+  } else {
+    $anonymous_status = 'disabled'
   }
 
   $nexus_home = "${base_dir}/nexus"
@@ -92,9 +112,21 @@ class nexus(
     enable => true
   }
 
-  file { "${base_dir}/sonatype-work/nexus/conf/security.xml":
-    content => template('nexus/security.xml.erb'),
-    mode    => '644',
-    require => Exec [ "extract ${tar_name}"],
+  file {
+    "${base_dir}/sonatype-work/nexus/conf/security.xml":
+      content => template('nexus/security.xml.erb'),
+      mode    => '0600',
+      owner   => $run_as_user,
+      group   => $run_as_user,
+      replace => false,
+      require => Exec [ "extract ${tar_name}"];
+
+    "${base_dir}/sonatype-work/nexus/conf/security-configuration.xml":
+      content => template('nexus/security-configuration.xml.erb'),
+      mode    => '0600',
+      owner   => $run_as_user,
+      group   => $run_as_user,
+      replace => false,
+      require => Exec [ "extract ${tar_name}"],
   }
 }

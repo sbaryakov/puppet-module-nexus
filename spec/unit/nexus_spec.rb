@@ -46,6 +46,18 @@ describe 'nexus', :type => :class do
       should contain_user('nexus')
     end
 
+    it 'should contain file security.xml with default admin password' do
+      should contain_file('/usr/local/sonatype-work/nexus/conf/security.xml').with_content(
+        %r[\$shiro1\$SHA-512\$1024\$G\+rxqm4Qw5/J54twR6BrSQ==\$2ZUS4aBHbGGZkNzLugcQqhea7uPOXhoY4kugop4r4oSAYlJTyJ9RyZYLuFBmNzDr16Ii1Q\+O6Mn1QpyBA1QphA==]
+      )
+    end
+
+    it 'should contain file security-configuration.xml with anonymousAccessEnabled false' do
+      should contain_file('/usr/local/sonatype-work/nexus/conf/security-configuration.xml').with_content(
+        %r[<anonymousAccessEnabled>false</anonymousAccessEnabled>]
+      )
+    end
+
     context 'when install_java param is false' do
       let(:params) {{ :install_java => false }}
 
@@ -63,7 +75,41 @@ describe 'nexus', :type => :class do
     end
 
     it 'should fail with an error' do
-      expect { subject }.to raise_error(Puppet::Error,/unsupported/)
+      compile.and_raise_error(/unsupported/)
     end
   end
+
+  context 'with mounted storage' do
+    let :params do
+      {
+        :base_dir      => '/usr/local',
+        :run_as_user   => 'nexus',
+        :remote_url    => 'http://www.sonatype.org/downloads/nexus-latest-bundle.tar.gz',
+        :tar_name      => 'nexus-latest.tar.gz',
+        :install_java  => false,
+        :blk_device    => '/dev/sdb',
+        :mount_storage => true
+      }
+    end
+    let :facts do
+      {
+        :osfamily           => 'redhat',
+        :operatingsystem    => 'redhat'
+      }
+    end
+
+    it 'should contain storage class' do
+      should contain_class('nexus::storage')
+    end
+
+    it 'should contain xfs filesystem on the correct block device' do
+      should contain_filesystem('/dev/sdb').with({:fs_type => 'xfs'})
+    end
+
+    it 'should contain mount' do
+      should contain_mount('/usr/local/sonatype-work').with({:device => '/dev/sdb'})
+    end
+
+  end
+
 end
