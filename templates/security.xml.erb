@@ -6,7 +6,7 @@
       <id>admin</id>
       <firstName>Administrator</firstName>
       <lastName>User</lastName>
-      <password><%= @admin_password_sha1 %></password>
+      <password><%= @admin_password_crypt %></password>
       <status>active</status>
       <email>changeme@yourcompany.com</email>
     </user>
