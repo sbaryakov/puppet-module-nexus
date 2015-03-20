@@ -2,19 +2,54 @@
 #
 #
 class nexus(
-  $base_dir            = '/usr/local',
-  $run_as_user         = 'nexus',
-  $remote_url          = 'http://download.sonatype.com/nexus/oss/nexus-latest-bundle.tar.gz',
-  $tar_name            = 'nexus-latest.tar.gz',
-  $java_initmemory     = 128,
-  $java_maxmemory      = 256,
-  $install_java        = true,
-  $admin_password_sha1 = undef,
-  $anonymous_status    = undef
+  $base_dir             = '/usr/local',
+  $run_as_user          = 'nexus',
+  $remote_url           = 'http://download.sonatype.com/nexus/oss/nexus-latest-bundle.tar.gz',
+  $tar_name             = 'nexus-latest.tar.gz',
+  $java_initmemory      = 128,
+  $java_maxmemory       = 256,
+  $install_java         = true,
+  $admin_password_crypt = '$shiro1$SHA-512$1024$G+rxqm4Qw5/J54twR6BrSQ==$2ZUS4aBHbGGZkNzLugcQqhea7uPOXhoY4kugop4r4oSAYlJTyJ9RyZYLuFBmNzDr16Ii1Q+O6Mn1QpyBA1QphA==',
+  $enable_anonymous     = false,
+  $blk_device           = '/dev/xvdb',
+  $mount_storage        = false
 ) {
+
+  validate_bool($enable_anonymous)
+  validate_bool($install_java)
+  validate_bool($mount_storage)
 
   if $install_java == true {
     include java
+  }
+
+  if $mount_storage {
+    File["${base_dir}/sonatype-work"] -> Class['nexus::storage']
+    class { 'nexus::storage':}
+
+  }
+
+
+ file { "${base_dir}/sonatype-work":
+    ensure  => directory,
+    recurse => true,
+    owner   => $run_as_user,
+    group   => $run_as_user,
+    mode    => '0644',
+  } ->
+
+  exec {
+    'set_rights':
+     command      => "/bin/chown -R ${run_as_user}:${run_as_user} ${base_dir}/sonatype-work/",
+     refreshonly  => true,
+  } 
+
+
+  
+if $enable_anonymous {
+    $anonymous_status = 'active'
+  } else {
+    $anonymous_status = 'disabled'
   }
 
   $nexus_home = "${base_dir}/nexus"
@@ -36,6 +71,7 @@ class nexus(
     User[$run_as_user] -> File[$nexus_home, "${base_dir}/sonatype-work"] -> Service['nexus']
   }
 
+
   staging::file { $tar_name:
     source => $remote_url,
   } ->
@@ -45,6 +81,7 @@ class nexus(
     cwd       => $base_dir,
     creates   => $nexus_home,
     logoutput => on_failure,
+    require   => File ["${base_dir}/sonatype-work"],
   } ->
 
   file { $nexus_home:
@@ -55,13 +92,28 @@ class nexus(
     mode    => '0775',
   } ->
 
-  file { "${base_dir}/sonatype-work":
+ 
+ file { "${base_dir}/sonatype-work/nexus":
     ensure  => directory,
     recurse => true,
     owner   => $run_as_user,
     group   => $run_as_user,
     mode    => '0644',
   } ->
+
+ file { "${base_dir}/sonatype-work/nexus/conf":
+    ensure  => directory,
+    recurse => true,
+    owner   => $run_as_user,
+    group   => $run_as_user,
+    mode    => '0644',
+  } ->
+
+  exec {
+    'set_rights_1':
+     command      => "/bin/chown -R ${run_as_user}:${run_as_user} ${base_dir}/sonatype-work/",
+     refreshonly  => true,
+  } 
 
   file { '/etc/init.d/nexus':
     ensure  => file,
@@ -87,14 +139,29 @@ class nexus(
       value   => $java_maxmemory;
   } ->
 
+
+  file {
+    "${base_dir}/sonatype-work/nexus/conf/security.xml":
+      content => template('nexus/security.xml.erb'),
+      mode    => '0600',
+      owner   => $run_as_user,
+      group   => $run_as_user,
+      replace => false,
+      require  => File ["${base_dir}/sonatype-work/nexus/conf"],
+  }
+
+  file {
+    "${base_dir}/sonatype-work/nexus/conf/security-configuration.xml":
+      content => template('nexus/security-configuration.xml.erb'),
+      mode    => '0600',
+      owner   => $run_as_user,
+      group   => $run_as_user,
+      replace => false,
+      require => File ["${base_dir}/sonatype-work/nexus/conf"],
+  } ->
+  
   service { 'nexus':
     ensure => 'running',
     enable => true
-  }
-
-  file { "${base_dir}/sonatype-work/nexus/conf/security.xml":
-    content => template('nexus/security.xml.erb'),
-    mode    => '644',
-    require => Exec [ "extract ${tar_name}"],
   }
 }
