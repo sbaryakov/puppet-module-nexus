@@ -126,6 +126,10 @@ if $enable_anonymous {
       value   => $java_maxmemory;
   } ->
 
+  service { 'nexus':
+    ensure => 'running',
+    enable => true
+  }
 
   file {
     "${base_dir}/sonatype-work/nexus/conf/security.xml":
@@ -145,10 +149,5 @@ if $enable_anonymous {
       group   => $run_as_user,
       replace => false,
       require => File ["${base_dir}/sonatype-work/nexus/conf"],
-  } ->
-  
-  service { 'nexus':
-    ensure => 'running',
-    enable => true
-  }
+  } 
 }
