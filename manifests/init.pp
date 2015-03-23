@@ -12,7 +12,7 @@ class nexus(
   $admin_password_crypt = '$shiro1$SHA-512$1024$G+rxqm4Qw5/J54twR6BrSQ==$2ZUS4aBHbGGZkNzLugcQqhea7uPOXhoY4kugop4r4oSAYlJTyJ9RyZYLuFBmNzDr16Ii1Q+O6Mn1QpyBA1QphA==',
   $enable_anonymous     = false,
   $blk_device           = '/dev/xvdb',
-  $mount_storage        = false
+  $mount_storage        = true
 ) {
 
   validate_bool($enable_anonymous)
@@ -36,14 +36,7 @@ class nexus(
     owner   => $run_as_user,
     group   => $run_as_user,
     mode    => '0644',
-  } ->
-
-  exec {
-    'set_rights':
-     command      => "/bin/chown -R ${run_as_user}:${run_as_user} ${base_dir}/sonatype-work/",
-     refreshonly  => true,
-  } 
-
+  }
 
   
 if $enable_anonymous {
@@ -108,12 +101,6 @@ if $enable_anonymous {
     group   => $run_as_user,
     mode    => '0644',
   } ->
-
-  exec {
-    'set_rights_1':
-     command      => "/bin/chown -R ${run_as_user}:${run_as_user} ${base_dir}/sonatype-work/",
-     refreshonly  => true,
-  } 
 
   file { '/etc/init.d/nexus':
     ensure  => file,

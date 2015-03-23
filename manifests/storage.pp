@@ -14,12 +14,5 @@ class nexus::storage {
       options  => 'noatime,nodiratime,noexec',
       before   => Exec [ "extract ${nexus::tar_name}"],
       atboot   => true,
-    } ->
-    
-    exec {
-      'fix_rights':
-        command      => "/bin/chown ${nexus::run_as_user}:${nexus::run_as_user} ${nexus::base_dir}/sonatype-work",
-        refreshonly  => true,
     }
-
 }
