@@ -12,7 +12,9 @@ class nexus(
   $admin_password_crypt = '$shiro1$SHA-512$1024$G+rxqm4Qw5/J54twR6BrSQ==$2ZUS4aBHbGGZkNzLugcQqhea7uPOXhoY4kugop4r4oSAYlJTyJ9RyZYLuFBmNzDr16Ii1Q+O6Mn1QpyBA1QphA==',
   $enable_anonymous     = false,
   $blk_device           = undef,
-  $mount_storage        = false
+  $mount_storage        = false,
+  $service_ensure       = 'running',
+  $service_enable       = true
 ) {
 
   validate_bool($enable_anonymous)
@@ -24,12 +26,19 @@ class nexus(
   }
 
   if $mount_storage {
-
     File["${base_dir}/sonatype-work"] -> Class['nexus::storage'] -> Service['nexus']
     class { 'nexus::storage': }
 
   }
 
+
+  file { "${base_dir}/sonatype-work":
+    ensure  => directory,
+    recurse => true,
+    owner   => $run_as_user,
+    group   => $run_as_user,
+    mode    => '0644',
+  }
 
   if $enable_anonymous {
     $anonymous_status = 'active'
@@ -56,6 +65,7 @@ class nexus(
     User[$run_as_user] -> File[$nexus_home, "${base_dir}/sonatype-work"] -> Service['nexus']
   }
 
+
   staging::file { $tar_name:
     source => $remote_url,
   } ->
@@ -65,6 +75,7 @@ class nexus(
     cwd       => $base_dir,
     creates   => $nexus_home,
     logoutput => on_failure,
+    require   => File ["${base_dir}/sonatype-work"],
   } ->
 
   file { $nexus_home:
@@ -75,7 +86,16 @@ class nexus(
     mode    => '0775',
   } ->
 
-  file { "${base_dir}/sonatype-work":
+
+ file { "${base_dir}/sonatype-work/nexus":
+    ensure  => directory,
+    recurse => true,
+    owner   => $run_as_user,
+    group   => $run_as_user,
+    mode    => '0644',
+  } ->
+
+ file { "${base_dir}/sonatype-work/nexus/conf":
     ensure  => directory,
     recurse => true,
     owner   => $run_as_user,
@@ -127,6 +147,7 @@ class nexus(
       owner   => $run_as_user,
       group   => $run_as_user,
       replace => false,
-      require => Exec [ "extract ${tar_name}"],
+      require  => File ["${base_dir}/sonatype-work/nexus/conf"],
   }
+
 }

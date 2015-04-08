@@ -12,7 +12,7 @@ class nexus::storage {
       device   => $nexus::blk_device,
       fstype   => 'xfs',
       options  => 'noatime,nodiratime,noexec',
-      atboot   => true;
+      before   => Exec [ "extract ${nexus::tar_name}"],
+      atboot   => true,
     }
-
 }

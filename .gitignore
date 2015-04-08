@@ -1,3 +1,5 @@
 .rspec_system
 pkg/
 spec/fixtures
+vendor
+.bundle
