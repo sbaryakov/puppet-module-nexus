@@ -113,19 +113,21 @@ class nexus(
       path    => "${base_dir}/nexus/bin/jsw/conf/wrapper.conf",
       section => '',
       setting => 'wrapper.java.initmemory',
-      value   => $java_initmemory;
+      value   => $java_initmemory,
+      notify  => Service['nexus'];
 
     'java_maxmemory':
       ensure  => present,
       path    => "${base_dir}/nexus/bin/jsw/conf/wrapper.conf",
       section => '',
       setting => 'wrapper.java.maxmemory',
-      value   => $java_maxmemory;
+      value   => $java_maxmemory,
+      notify  => Service['nexus'];
   } ->
 
   service { 'nexus':
-    ensure => 'running',
-    enable => true
+    ensure => $service_ensure,
+    enable => $service_enable
   }
 
   file {
