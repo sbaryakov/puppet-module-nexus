@@ -11,6 +11,7 @@ class nexus(
   $install_java         = true,
   $admin_password_crypt = '$shiro1$SHA-512$1024$G+rxqm4Qw5/J54twR6BrSQ==$2ZUS4aBHbGGZkNzLugcQqhea7uPOXhoY4kugop4r4oSAYlJTyJ9RyZYLuFBmNzDr16Ii1Q+O6Mn1QpyBA1QphA==',
   $enable_anonymous     = false,
+  $initialize_passwords = true,
   $blk_device           = undef,
   $mount_storage        = false,
   $service_ensure       = 'running',
@@ -131,22 +132,24 @@ class nexus(
     enable => $service_enable
   }
 
-  file {
-    "${base_dir}/sonatype-work/nexus/conf/security.xml":
-      content => template('nexus/security.xml.erb'),
-      mode    => '0600',
-      owner   => $run_as_user,
-      group   => $run_as_user,
-      replace => false,
-      require => Exec [ "extract ${tar_name}"];
+  if $initialize_passwords {
+    file {
+      "${base_dir}/sonatype-work/nexus/conf/security.xml":
+        content => template('nexus/security.xml.erb'),
+        mode    => '0600',
+        owner   => $run_as_user,
+        group   => $run_as_user,
+        replace => false,
+        require => Exec [ "extract ${tar_name}"];
 
-    "${base_dir}/sonatype-work/nexus/conf/security-configuration.xml":
-      content => template('nexus/security-configuration.xml.erb'),
-      mode    => '0600',
-      owner   => $run_as_user,
-      group   => $run_as_user,
-      replace => false,
-      require  => File ["${base_dir}/sonatype-work/nexus/conf"],
+      "${base_dir}/sonatype-work/nexus/conf/security-configuration.xml":
+        content => template('nexus/security-configuration.xml.erb'),
+        mode    => '0600',
+        owner   => $run_as_user,
+        group   => $run_as_user,
+        replace => false,
+        require  => File ["${base_dir}/sonatype-work/nexus/conf"],
+    }
   }
 
 }
